@@ -69,4 +69,8 @@ def parse_expression(text: str) -> Expression:
         # Parse expression inside parentheses
         return parse_expression(text[1:-1])
 
+    # Lastly, treat all letter strings as variable names
+    if text.isalpha():
+        return Variable(text)
+
     raise ValueError('Unknown expression string: ' + text)
