@@ -23,6 +23,13 @@ OperatorSets = [
     ['^'],
 ]
 
+def isnumstr(text: str) -> bool:
+    try:
+        float(text)
+        return True
+    except ValueError:
+        return False
+
 def parse_expression(text: str) -> Expression:
     # Remove all whitespace
     text = text.replace(' ', '')
@@ -31,7 +38,7 @@ def parse_expression(text: str) -> Expression:
     depth = 0
 
     # If string is a number, return the number
-    if text.isdigit():
+    if isnumstr(text):
         try:
             num = int(text) if int(text) == float(text) else float(text)
         except ValueError:
