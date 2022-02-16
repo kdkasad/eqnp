@@ -26,6 +26,9 @@ class Variable(Expression):
         # TODO: catch errors
         return vm.evaluate(self.name)
 
+    def __repr__(self):
+        return self.name
+
 class UnaryExpression(Expression, ABC):
     def __init__(self, value: Expression):
         self.value = value
