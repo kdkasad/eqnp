@@ -1,7 +1,17 @@
 from .expressions import *
 
-# Operators sorted in reverse order of precedence
-operators = [
+# Map from operator characters to their corresponding expression classes
+OperatorMap = {
+    '+': Addition,
+    '-': Subtraction,
+    '*': Multiplication,
+    '/': Division,
+    '^': Exponent,
+    # No operator for Root yet
+}
+
+# List of operator characters in reverse order of operation precedence
+OperatorSets = [
     ['+', '-'],
     ['*', '/'],
     ['^'],
@@ -23,7 +33,7 @@ def parse_expression(text: str) -> Expression:
         return Number(num)
 
     # Search for top-level operators
-    for opset in operators:
+    for opset in OperatorSets:
         i = 0
         while i < len(text):
 
@@ -35,7 +45,7 @@ def parse_expression(text: str) -> Expression:
                 # TODO: fix operator precedence
                 lhs = text[:i]
                 rhs = text[i+1:]
-                exp_class = Expression.OperatorMap[text[i]]
+                exp_class = OperatorMap[text[i]]
                 return exp_class(parse_expression(lhs), parse_expression(rhs))
 
             i += 1
