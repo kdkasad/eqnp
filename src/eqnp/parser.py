@@ -1,5 +1,11 @@
 from .expressions import *
 
+__all__ = [
+    'parse_expression',
+    'OperatorMap',
+    'OperatorSets',
+]
+
 # Map from operator characters to their corresponding expression classes
 OperatorMap = {
     '+': Addition,
