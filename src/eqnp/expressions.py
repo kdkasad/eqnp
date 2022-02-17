@@ -18,6 +18,10 @@ class Expression(ABC):
     def evaluate(self, vm: VariableMap = None):
         pass
 
+    @abstractmethod
+    def __repr__(self) -> str:
+        pass
+
 class Variable(Expression):
     def __init__(self, name: str):
         self.name = name
@@ -26,7 +30,7 @@ class Variable(Expression):
         # TODO: catch errors
         return vm.evaluate(self.name)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.name
 
 class UnaryExpression(Expression, ABC):
