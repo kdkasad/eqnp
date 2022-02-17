@@ -32,6 +32,8 @@ class Variable(Expression):
 
     def evaluate(self, vm: VariableMap):
         # TODO: catch errors
+        if vm == None:
+            raise ValueError(f'No value for variable {self.name}')
         return vm.evaluate(self.name)
 
     def __repr__(self) -> str:
