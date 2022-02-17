@@ -35,8 +35,11 @@ class VariableMap:
         """
         del self.map[name]
 
-    def evaluate(self, name: str):
-        return self.map[name].evaluate(self)
+    def get(self, name: str):
+        """
+        Gets the value of a variable.
+        """
+        return self.map[name]
 
 class Expression(ABC):
     """
@@ -85,7 +88,7 @@ class Variable(Expression):
         # TODO: catch errors
         if vm == None:
             raise ValueError(f'No value for variable {self.name}')
-        return vm.evaluate(self.name)
+        return vm.get(self.name).evaluate(vm)
 
     def __repr__(self) -> str:
         return self.name
