@@ -78,6 +78,9 @@ class Expression(ABC):
         respectTo is 'x', the derivative of x will be 1 and every other
         variable/expression will be differentiated with respect to x.
 
+        vm: (VariableMap) map of variables to their values. Same as for
+        Expression.evaluate().
+
         Note: the returned result is not simplified.
         """
         pass
