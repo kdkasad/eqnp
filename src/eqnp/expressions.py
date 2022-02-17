@@ -22,6 +22,10 @@ class Expression(ABC):
     def __repr__(self) -> str:
         pass
 
+    @abstractmethod
+    def differentiate(self):
+        pass
+
 class Variable(Expression):
     def __init__(self, name: str):
         self.name = name
@@ -32,6 +36,9 @@ class Variable(Expression):
 
     def __repr__(self) -> str:
         return self.name
+
+    def differentiate(self) -> Expression:
+        return Number(1)
 
 class UnaryExpression(Expression, ABC):
     def __init__(self, value: Expression):
@@ -58,25 +65,85 @@ class Number(Expression):
     def __repr__(self):
         return str(self.value)
 
+    def differentiate(self) -> Expression:
+        return Number(0)
+
 class Addition(BinaryExpression):
     def evaluate(self, vm: VariableMap = None):
         return self.left.evaluate(vm) + self.right.evaluate(vm)
+
+    def differentiate(self) -> Expression:
+        return Addition(
+            self.left.differentiate(),
+            self.right.differentiate()
+        )
 
 class Subtraction(BinaryExpression):
     def evaluate(self, vm: VariableMap = None):
         return self.left.evaluate(vm) - self.right.evaluate(vm)
 
+    def differentiate(self) -> Expression:
+        return Subtraction(
+            self.left.differentiate(),
+            self.right.differentiate()
+        )
+
 class Multiplication(BinaryExpression):
     def evaluate(self, vm: VariableMap = None):
         return self.left.evaluate(vm) * self.right.evaluate(vm)
+
+    def differentiate(self) -> Expression:
+        return Addition(
+            Multiplication(
+                self.left,
+                self.right.differentiate()
+            ),
+            Multiplication(
+                self.right,
+                self.left.differentiate()
+            )
+        )
 
 class Division(BinaryExpression):
     def evaluate(self, vm: VariableMap = None):
         return self.left.evaluate(vm) / self.right.evaluate(vm)
 
+    def differentiate(self) -> Expression:
+        return Division(
+            Subtraction(
+                Multiplication(
+                    self.left.differentiate(),
+                    self.right
+                ),
+                Multiplication(
+                    self.left,
+                    self.right.differentiate()
+                )
+            ),
+            Exponent(
+                self.right,
+                Number(2)
+            )
+        )
+
 class Exponent(BinaryExpression):
     def evaluate(self, vm: VariableMap = None):
         return self.left.evaluate(vm) ** self.right.evaluate(vm)
+
+    def differentiate(self):
+        return Multiplication(
+            Multiplication(
+                self.right,
+                Exponent(
+                    self.left,
+                    Subtraction(
+                        self.right,
+                        Number(1)
+                    )
+                )
+            ),
+            self.left.differentiate()
+        )
 
 # Root(base, num) is an alias for num^(1/base)
 def Root(base: Expression, num: Expression) -> Expression:
