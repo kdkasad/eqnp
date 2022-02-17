@@ -149,4 +149,10 @@ class Exponent(BinaryExpression):
 
 # Root(base, num) is an alias for num^(1/base)
 def Root(base: Expression, num: Expression) -> Expression:
-    return Exponent(num, Division(Number(1), base))
+    return Exponent(
+        num,
+        Division(
+            Number(1),
+            base
+        )
+    )
