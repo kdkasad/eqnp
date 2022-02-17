@@ -12,21 +12,53 @@
 from abc import ABC, abstractmethod
 
 class VariableMap:
+    """
+    Maps variables to their values.
+    Currently is no more than a wrapper around a dict, but may be expanded upon
+    later, so it exists in its own class.
+    """
     def __init__(self, initialMap: dict):
         self.map = initialMap
 
     def set(self, name: str, value):
+        """
+        Set the value of a variable.
+
+        name: name of variable (str)
+        value: value of variable (Expression)
+        """
         self.map[name] = value
 
     def remove(self, name: str):
+        """
+        Unsets a variable.
+        """
         del self.map[name]
 
     def evaluate(self, name: str):
         return self.map[name].evaluate(self)
 
 class Expression(ABC):
+    """
+    Expression base class.
+
+    Everything in eqnp is represented as a tree of Expressions. Each elementary
+    operation is its own Expression subclass, as well as Numbers and Variables.
+    Functions may be implemented later, too.
+
+    Note: Expression is an abstract class. Only its subclasses can be
+    instantiated.
+    """
     @abstractmethod
     def evaluate(self, vm: VariableMap = None):
+        """
+        Calculate the value of an expression.
+
+        Any variable used in the expression tree being evaluated must be
+        defined in the variable map.
+
+        vm: (VariableMap) a map of variables to their values.
+        """
         pass
 
     @abstractmethod
@@ -35,9 +67,17 @@ class Expression(ABC):
 
     @abstractmethod
     def differentiate(self):
+        """
+        Calculate the derivative of the expression tree.
+
+        Note: the returned result is not simplified.
+        """
         pass
 
 class Variable(Expression):
+    """
+    Represents a variable.
+    """
     def __init__(self, name: str):
         self.name = name
 
@@ -54,6 +94,9 @@ class Variable(Expression):
         return Number(1)
 
 class UnaryExpression(Expression, ABC):
+    """
+    Abstract class representing an expression with one child expression.
+    """
     def __init__(self, value: Expression):
         self.value = value
 
@@ -61,6 +104,9 @@ class UnaryExpression(Expression, ABC):
         return f'{self.__class__.__name__}({self.value})'
 
 class BinaryExpression(Expression, ABC):
+    """
+    Abstract class respresenting an expression with two child expressions.
+    """
     def __init__(self, left: Expression, right: Expression):
         self.left = left
         self.right = right
@@ -69,6 +115,9 @@ class BinaryExpression(Expression, ABC):
         return f'{self.__class__.__name__}({self.left}, {self.right})'
 
 class Number(Expression):
+    """
+    Represents a constant number. Can be an integer or a floating-point number.
+    """
     def __init__(self, value):
         self.value = value
 
@@ -82,6 +131,12 @@ class Number(Expression):
         return Number(0)
 
 class Addition(BinaryExpression):
+    """
+    Represents the addition operation.
+
+    Evaluating an addition expression returns the sum of the two child
+    expressions' evaluations.
+    """
     def evaluate(self, vm: VariableMap = None):
         return self.left.evaluate(vm) + self.right.evaluate(vm)
 
@@ -92,6 +147,12 @@ class Addition(BinaryExpression):
         )
 
 class Subtraction(BinaryExpression):
+    """
+    Represents the subtraction operation.
+
+    Evaluating an subtraction expression returns the difference of the two
+    child expressions' evaluations.
+    """
     def evaluate(self, vm: VariableMap = None):
         return self.left.evaluate(vm) - self.right.evaluate(vm)
 
@@ -102,6 +163,12 @@ class Subtraction(BinaryExpression):
         )
 
 class Multiplication(BinaryExpression):
+    """
+    Represents the multiplication operation.
+
+    Evaluating an multiplication expression returns the product of the two
+    child expressions' evaluations.
+    """
     def evaluate(self, vm: VariableMap = None):
         return self.left.evaluate(vm) * self.right.evaluate(vm)
 
@@ -118,6 +185,13 @@ class Multiplication(BinaryExpression):
         )
 
 class Division(BinaryExpression):
+    """
+    Represents the division operation.
+
+    Evaluating an division expression returns the result of the first
+    child expression's evaluation divided by that of the second child
+    expression.
+    """
     def evaluate(self, vm: VariableMap = None):
         return self.left.evaluate(vm) / self.right.evaluate(vm)
 
@@ -140,6 +214,12 @@ class Division(BinaryExpression):
         )
 
 class Exponent(BinaryExpression):
+    """
+    Represents the exponentiation operation.
+
+    Evaluating an exponent expression returns the value of the first child
+    expression's value to the power of the second child expression's value.
+    """
     def evaluate(self, vm: VariableMap = None):
         return self.left.evaluate(vm) ** self.right.evaluate(vm)
 
@@ -158,8 +238,12 @@ class Exponent(BinaryExpression):
             self.left.differentiate()
         )
 
-# Root(base, num) is an alias for num^(1/base)
 def Root(base: Expression, num: Expression) -> Expression:
+    """
+    Provides the root expression.
+    This is merely an alias for num^(1/base), or
+    Exponent(num, Division(1, base)).
+    """
     return Exponent(
         num,
         Division(
