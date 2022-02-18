@@ -222,6 +222,31 @@ class Multiplication(BinaryExpression):
             )
         )
 
+    def simplify(self, vm: VariableMap = None):
+        self.left = self.left.simplify(vm)
+        self.right = self.right.simplify(vm)
+
+        # Identities
+        if self.left == 0 or self.right == 0:
+            return Number(0)
+        if self.left == 1:
+            return self.right
+        if self.right == 1:
+            return self.left
+
+        # Simplify y*(x/y) to x
+        if isinstance(self.left, Division) and self.left.right.evaluate(vm) == self.right.evaluate(vm):
+            return self.left.left
+        if isinstance(self.right, Division) and self.right.right.evaluate(vm) == self.left.evaluate(vm):
+            return self.right.left
+
+        # Simplify x^a * x^b to x^(a+b)
+        if isinstance(self.left, Exponent) and isinstance(self.right, Exponent) \
+                and self.left.left.evaluate(vm) == self.right.left.evaluate(vm):
+            return Exponent(self.left.left, Addition(self.left.right, self.right.right))
+
+        return self
+
     def __eq__(self, other) -> bool:
         # (a * b) == (b * a)
         if isinstance(other, type(self)):
