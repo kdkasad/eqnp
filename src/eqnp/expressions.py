@@ -177,6 +177,17 @@ class Addition(BinaryExpression):
             self.right.differentiate(respectTo, vm)
         )
 
+    def simplify(self, vm: VariableMap = None):
+        self.left = self.left.simplify(vm)
+        self.right = self.right.simplify(vm)
+
+        # Simplify x/a + y/a to (x-y)/a
+        if isinstance(self.left, Division) and isinstance(self.right, Division) \
+                and self.left.right.evaluate(vm) == self.right.right.evaluate(vm):
+            return Division(Addition(self.left.left, self.right.left), self.left.right)
+
+        return self
+
     def __eq__(self, other) -> bool:
         # (a + b) == (b + a)
         if isinstance(other, type(self)):
@@ -199,6 +210,17 @@ class Subtraction(BinaryExpression):
             self.left.differentiate(respectTo, vm),
             self.right.differentiate(respectTo, vm)
         )
+
+    def simplify(self, vm: VariableMap = None):
+        self.left = self.left.simplify(vm)
+        self.right = self.right.simplify(vm)
+
+        # Simplify x/a - y/a to (x-y)/a
+        if isinstance(self.left, Division) and isinstance(self.right, Division) \
+                and self.left.right.evaluate(vm) == self.right.right.evaluate(vm):
+            return Division(Subtraction(self.left.left, self.right.left), self.left.right)
+
+        return self
 
 class Multiplication(BinaryExpression):
     """
