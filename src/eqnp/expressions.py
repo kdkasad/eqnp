@@ -283,6 +283,29 @@ class Division(BinaryExpression):
             )
         )
 
+    def simplify(self, vm: VariableMap = None):
+        self.left = self.left.simplify()
+        self.right = self.right.simplify()
+
+        # Identities
+        if self.left == 0:
+            return Number(0)
+        if self.right == 1:
+            return self.left
+
+        # Simplify (x*y)/y to x
+        if isinstance(self.left, Multiplication) and self.left.left == self.right:
+            return self.left
+        if isinstance(self.left, Multiplication) and self.left.right == self.right:
+            return self.left
+
+        # Simplify (x^a) / (x^b) to x^(a-b)
+        if isinstance(self.left, Exponent) and isinstance(self.right, Exponent) \
+                and self.left.left.evaluate(vm) == self.right.left.evaluate(vm):
+            return Exponent(self.left.left, Subtraction(self.left.right, self.right.right))
+
+        return self
+
 class Exponent(BinaryExpression):
     """
     Represents the exponentiation operation.
