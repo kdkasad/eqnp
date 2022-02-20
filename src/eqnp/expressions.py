@@ -353,6 +353,16 @@ class Exponent(BinaryExpression):
             self.left.differentiate(respectTo, vm)
         )
 
+    def simplify(self, vm: VariableMap = None):
+        self.left = self.left.simplify(vm)
+        self.right = self.right.simplify(vm)
+
+        # Simplify (x^a)^b to x^(ab)
+        if isinstance(self.left, Exponent):
+            return Exponent(self.left.left, Multiplication(self.left.right, self.right))
+
+        return self
+
 def Root(base: Expression, num: Expression) -> Expression:
     """
     Provides the root expression.
