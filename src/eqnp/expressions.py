@@ -94,6 +94,10 @@ class Expression(ABC):
         """
         pass
 
+    @abstractmethod
+    def simplify(self, vm: VariableMap = None):
+        pass
+
 class Variable(Expression):
     """
     Represents a variable.
@@ -117,6 +121,9 @@ class Variable(Expression):
             raise ValueError(f'No value for variable {self.name}')
         else:
             return vm.get(self.name).differentiate(respectTo, vm)
+
+    def simplify(self, vm: VariableMap = None):
+        return self
 
 class UnaryExpression(Expression, ABC):
     """
@@ -160,6 +167,9 @@ class Number(Expression):
 
     def differentiate(self, respectTo: str, vm: VariableMap) -> Expression:
         return Number(0)
+
+    def simplify(self, vm: VariableMap = None):
+        return self
 
 class Addition(BinaryExpression):
     """
