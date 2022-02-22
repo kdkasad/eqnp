@@ -52,6 +52,15 @@ class Expression(ABC):
     Note: Expression is an abstract class. Only its subclasses can be
     instantiated.
     """
+
+    def __eq__(self, other) -> bool:
+        if isinstance(other, type(self)):
+            return self.__dict__ == other.__dict__
+        return False
+
+    def __ne__(self, other) -> bool:
+        return not self.__eq__(other)
+
     @abstractmethod
     def evaluate(self, vm: VariableMap = None):
         """
@@ -143,6 +152,12 @@ class Number(Expression):
     def __repr__(self):
         return str(self.value)
 
+    def __eq__(self, other):
+        # Allow comparison with a plain number type
+        if isinstance(other, int) or isinstance(other, float):
+            return self.value == other
+        return super().__eq__(other)
+
     def differentiate(self, respectTo: str, vm: VariableMap) -> Expression:
         return Number(0)
 
@@ -161,6 +176,13 @@ class Addition(BinaryExpression):
             self.left.differentiate(respectTo, vm),
             self.right.differentiate(respectTo, vm)
         )
+
+    def __eq__(self, other) -> bool:
+        # (a + b) == (b + a)
+        if isinstance(other, type(self)):
+            return (self.left == other.left and self.right == other.right) \
+                or (self.left == other.right and self.right == other.left)
+        return super().__eq__(other)
 
 class Subtraction(BinaryExpression):
     """
@@ -199,6 +221,13 @@ class Multiplication(BinaryExpression):
                 self.left.differentiate(respectTo, vm)
             )
         )
+
+    def __eq__(self, other) -> bool:
+        # (a * b) == (b * a)
+        if isinstance(other, type(self)):
+            return (self.left == other.left and self.right == other.right) \
+                or (self.left == other.right and self.right == other.left)
+        return super().__eq__(other)
 
 class Division(BinaryExpression):
     """
