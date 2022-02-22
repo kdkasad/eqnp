@@ -126,7 +126,7 @@ class UnaryExpression(Expression, ABC):
         self.value = value
 
     def __repr__(self):
-        return f'{self.__class__.__name__}({self.value})'
+        return f'{type(self).__name__}({self.value})'
 
 class BinaryExpression(Expression, ABC):
     """
@@ -137,7 +137,7 @@ class BinaryExpression(Expression, ABC):
         self.right = right
 
     def __repr__(self):
-        return f'{self.__class__.__name__}({self.left}, {self.right})'
+        return f'{type(self).__name__}({self.left}, {self.right})'
 
 class Number(Expression):
     """
