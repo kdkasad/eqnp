@@ -194,6 +194,10 @@ class Addition(BinaryExpression):
         self.left = self.left.simplify()
         self.right = self.right.simplify()
 
+        # If both operands are numbers, evaluate them
+        if isinstance(self.left, Number) and isinstance(self.right, Number):
+            return Number(self.evaluate(None))
+
         # Simplify x/a + y/a to (x-y)/a
         if isinstance(self.left, Division) and isinstance(self.right, Division) \
                 and self.left.right == self.right.right:
@@ -227,6 +231,10 @@ class Subtraction(BinaryExpression):
     def simplify(self):
         self.left = self.left.simplify()
         self.right = self.right.simplify()
+
+        # If both operands are numbers, evaluate them
+        if isinstance(self.left, Number) and isinstance(self.right, Number):
+            return Number(self.evaluate(None))
 
         # Simplify x/a - y/a to (x-y)/a
         if isinstance(self.left, Division) and isinstance(self.right, Division) \
@@ -268,6 +276,10 @@ class Multiplication(BinaryExpression):
             return self.right
         if self.right == 1:
             return self.left
+
+        # If both operands are numbers, evaluate them
+        if isinstance(self.left, Number) and isinstance(self.right, Number):
+            return Number(self.evaluate(None))
 
         # Simplify y*(x/y) to x
         if isinstance(self.left, Division) and self.left.right == self.right:
@@ -328,6 +340,10 @@ class Division(BinaryExpression):
         if self.right == 1:
             return self.left
 
+        # If both operands are numbers, evaluate them
+        if isinstance(self.left, Number) and isinstance(self.right, Number):
+            return Number(self.evaluate(None))
+
         # Simplify (x*y)/y to x
         if isinstance(self.left, Multiplication) and self.left.left == self.right:
             return self.left
@@ -369,6 +385,10 @@ class Exponent(BinaryExpression):
     def simplify(self):
         self.left = self.left.simplify()
         self.right = self.right.simplify()
+
+        # If both operands are numbers, evaluate them
+        if isinstance(self.left, Number) and isinstance(self.right, Number):
+            return Number(self.evaluate(None))
 
         # Simplify (x^a)^b to x^(ab)
         if isinstance(self.left, Exponent):
