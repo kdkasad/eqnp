@@ -94,6 +94,13 @@ class Expression(ABC):
         """
         pass
 
+    @abstractmethod
+    def simplify(self):
+        """
+        Attempts to simplify the expression as much as possible
+        """
+        pass
+
 class Variable(Expression):
     """
     Represents a variable.
@@ -117,6 +124,9 @@ class Variable(Expression):
             raise ValueError(f'No value for variable {self.name}')
         else:
             return vm.get(self.name).differentiate(respectTo, vm)
+
+    def simplify(self):
+        return self
 
 class UnaryExpression(Expression, ABC):
     """
@@ -161,6 +171,9 @@ class Number(Expression):
     def differentiate(self, respectTo: str, vm: VariableMap) -> Expression:
         return Number(0)
 
+    def simplify(self):
+        return self
+
 class Addition(BinaryExpression):
     """
     Represents the addition operation.
@@ -176,6 +189,21 @@ class Addition(BinaryExpression):
             self.left.differentiate(respectTo, vm),
             self.right.differentiate(respectTo, vm)
         )
+
+    def simplify(self):
+        self.left = self.left.simplify()
+        self.right = self.right.simplify()
+
+        # If both operands are numbers, evaluate them
+        if isinstance(self.left, Number) and isinstance(self.right, Number):
+            return Number(self.evaluate(None))
+
+        # Simplify x/a + y/a to (x-y)/a
+        if isinstance(self.left, Division) and isinstance(self.right, Division) \
+                and self.left.right == self.right.right:
+            return Division(Addition(self.left.left, self.right.left), self.left.right)
+
+        return self
 
     def __eq__(self, other) -> bool:
         # (a + b) == (b + a)
@@ -200,6 +228,21 @@ class Subtraction(BinaryExpression):
             self.right.differentiate(respectTo, vm)
         )
 
+    def simplify(self):
+        self.left = self.left.simplify()
+        self.right = self.right.simplify()
+
+        # If both operands are numbers, evaluate them
+        if isinstance(self.left, Number) and isinstance(self.right, Number):
+            return Number(self.evaluate(None))
+
+        # Simplify x/a - y/a to (x-y)/a
+        if isinstance(self.left, Division) and isinstance(self.right, Division) \
+                and self.left.right == self.right.right:
+            return Division(Subtraction(self.left.left, self.right.left), self.left.right)
+
+        return self
+
 class Multiplication(BinaryExpression):
     """
     Represents the multiplication operation.
@@ -221,6 +264,35 @@ class Multiplication(BinaryExpression):
                 self.left.differentiate(respectTo, vm)
             )
         )
+
+    def simplify(self):
+        self.left = self.left.simplify()
+        self.right = self.right.simplify()
+
+        # Identities
+        if self.left == 0 or self.right == 0:
+            return Number(0)
+        if self.left == 1:
+            return self.right
+        if self.right == 1:
+            return self.left
+
+        # If both operands are numbers, evaluate them
+        if isinstance(self.left, Number) and isinstance(self.right, Number):
+            return Number(self.evaluate(None))
+
+        # Simplify y*(x/y) to x
+        if isinstance(self.left, Division) and self.left.right == self.right:
+            return self.left.left
+        if isinstance(self.right, Division) and self.right.right == self.left:
+            return self.right.left
+
+        # Simplify x^a * x^b to x^(a+b)
+        if isinstance(self.left, Exponent) and isinstance(self.right, Exponent) \
+                and self.left.left == self.right.left:
+            return Exponent(self.left.left, Addition(self.left.right, self.right.right))
+
+        return self
 
     def __eq__(self, other) -> bool:
         # (a * b) == (b * a)
@@ -258,6 +330,33 @@ class Division(BinaryExpression):
             )
         )
 
+    def simplify(self):
+        self.left = self.left.simplify()
+        self.right = self.right.simplify()
+
+        # Identities
+        if self.left == 0:
+            return Number(0)
+        if self.right == 1:
+            return self.left
+
+        # If both operands are numbers, evaluate them
+        if isinstance(self.left, Number) and isinstance(self.right, Number):
+            return Number(self.evaluate(None))
+
+        # Simplify (x*y)/y to x
+        if isinstance(self.left, Multiplication) and self.left.left == self.right:
+            return self.left
+        if isinstance(self.left, Multiplication) and self.left.right == self.right:
+            return self.left
+
+        # Simplify (x^a) / (x^b) to x^(a-b)
+        if isinstance(self.left, Exponent) and isinstance(self.right, Exponent) \
+                and self.left.left == self.right.left:
+            return Exponent(self.left.left, Subtraction(self.left.right, self.right.right))
+
+        return self
+
 class Exponent(BinaryExpression):
     """
     Represents the exponentiation operation.
@@ -282,6 +381,20 @@ class Exponent(BinaryExpression):
             ),
             self.left.differentiate(respectTo, vm)
         )
+
+    def simplify(self):
+        self.left = self.left.simplify()
+        self.right = self.right.simplify()
+
+        # If both operands are numbers, evaluate them
+        if isinstance(self.left, Number) and isinstance(self.right, Number):
+            return Number(self.evaluate(None))
+
+        # Simplify (x^a)^b to x^(ab)
+        if isinstance(self.left, Exponent):
+            return Exponent(self.left.left, Multiplication(self.left.right, self.right))
+
+        return self
 
 def Root(base: Expression, num: Expression) -> Expression:
     """
