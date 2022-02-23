@@ -386,6 +386,18 @@ class Exponent(BinaryExpression):
         self.left = self.left.simplify()
         self.right = self.right.simplify()
 
+        # 0^a == 0
+        if self.left == 0:
+            return Number(0)
+
+        # x^0 == 1
+        if self.right == 0:
+            return Number(1)
+
+        # x^1 == x
+        if self.right == 1:
+            return self.left
+
         # If both operands are numbers, evaluate them
         if isinstance(self.left, Number) and isinstance(self.right, Number):
             return Number(self.evaluate(None))
