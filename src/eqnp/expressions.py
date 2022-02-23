@@ -96,6 +96,9 @@ class Expression(ABC):
 
     @abstractmethod
     def simplify(self):
+        """
+        Attempts to simplify the expression as much as possible
+        """
         pass
 
 class Variable(Expression):
