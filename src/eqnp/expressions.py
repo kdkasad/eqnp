@@ -149,6 +149,31 @@ class BinaryExpression(Expression, ABC):
     def __repr__(self):
         return f'{type(self).__name__}({self.left}, {self.right})'
 
+class MultiOperandExpression(Expression, ABC):
+    """
+    Abstract class representing an expression with two or more child
+    expressions. Should only be used for expressions in which the order of
+    operands does not matter, e.g. addition and multiplication.
+    """
+    def __init__(self, *args):
+        if len(args) < 2:
+            raise TypeError('MultiOperandExpression.__init__() requires at least two operands')
+        self.operands = list(args)
+
+    def __repr__(self):
+        return f'{type(self).__name__}({", ".join([str(x) for x in self.operands])})'
+
+    def __eq__(self, other) -> bool:
+        """
+        Checks if all the operands in this object are contained in the other
+        object. Order does not matter.
+        """
+        if isinstance(other, type(self)):
+            if len(self.operands) != len(other.operands):
+                return False
+            return set(self.operands) == set(other.operands)
+        return super().__eq__(other)
+
 class Number(Expression):
     """
     Represents a constant number. Can be an integer or a floating-point number.
