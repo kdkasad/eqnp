@@ -11,8 +11,10 @@
 
 from .parser import __all__ as __parser_all
 from .expressions import __all__ as __expressions_all
+from .functions import __all__ as __functions_all
 
 from .parser import *
 from .expressions import *
+from .functions import *
 
-__all__ = __parser_all + __expressions_all
+__all__ = __parser_all + __expressions_all + __functions_all
