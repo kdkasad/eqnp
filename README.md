@@ -58,7 +58,7 @@ are supported (`...` means an expression):
 There are still a lot of features that I want to implement. Some are listed as
 `# TODO:` comments in the source code, but I'll put a list here too:
 
-* Implement support for functions
 * Pull all constants out of nested multiplication expressions
 * Flip negative exponents in fractions to opposite side
+* Add inverse trigonometric functions
 * Implement integration

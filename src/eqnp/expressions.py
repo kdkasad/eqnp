@@ -113,6 +113,30 @@ class Expression(ABC):
             again = simplified.simplify()
         return simplified
 
+class UnaryExpression(Expression, ABC):
+    """
+    Abstract class representing an expression with one child expression.
+    """
+    def __init__(self, value: Expression):
+        self.value = value
+
+    def __repr__(self):
+        return f'{type(self).__name__}({self.value})'
+
+class BinaryExpression(Expression, ABC):
+    """
+    Abstract class respresenting an expression with two child expressions.
+    """
+    def __init__(self, left: Expression, right: Expression):
+        self.left = left
+        self.right = right
+
+    def __repr__(self):
+        return f'{type(self).__name__}({self.left}, {self.right})'
+
+# We must import the functions module after defining the base classes
+from .functions import *
+
 class Variable(Expression):
     """
     Represents a variable.
@@ -139,27 +163,6 @@ class Variable(Expression):
 
     def simplify(self):
         return self
-
-class UnaryExpression(Expression, ABC):
-    """
-    Abstract class representing an expression with one child expression.
-    """
-    def __init__(self, value: Expression):
-        self.value = value
-
-    def __repr__(self):
-        return f'{type(self).__name__}({self.value})'
-
-class BinaryExpression(Expression, ABC):
-    """
-    Abstract class respresenting an expression with two child expressions.
-    """
-    def __init__(self, left: Expression, right: Expression):
-        self.left = left
-        self.right = right
-
-    def __repr__(self):
-        return f'{type(self).__name__}({self.left}, {self.right})'
 
 class Number(Expression):
     """
@@ -331,6 +334,15 @@ class Division(BinaryExpression):
     child expression's evaluation divided by that of the second child
     expression.
     """
+
+    # TODO:
+    # Implement a function which checks if a certain
+    # expression is a factor of the denominator
+
+    # TODO:
+    # Implement a function which can move a factor of
+    # the denominator to the numerator and vice versa
+
     def evaluate(self, vm: VariableMap = None):
         return self.left.evaluate(vm) / self.right.evaluate(vm)
 
@@ -376,6 +388,15 @@ class Division(BinaryExpression):
         if isinstance(self.left, Exponent) and isinstance(self.right, Exponent) \
                 and self.left.left == self.right.left:
             return Exponent(self.left.left, Subtraction(self.left.right, self.right.right))
+
+        # Simplify sin(x)/cos(x) to tan(x)
+        if isinstance(self.left, Sine) and isinstance(self.right, Cosine) \
+                and self.left.value == self.right.value:
+            return Tangent(self.left.value)
+        # Simplify cos(x)/sin(x) to cot(x)
+        if isinstance(self.left, Cosine) and isinstance(self.right, Sine) \
+                and self.left.value == self.right.value:
+            return Cotangent(self.left.value)
 
         return self
 
