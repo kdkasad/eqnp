@@ -77,11 +77,90 @@ class Cosine(Function):
         #       E.g. cos(pi/4) -> sqrt(2)/2
         return self
 
+class Tangent(Function):
+    def evaluate(self, vm: VariableMap = None):
+        return tan(self.value.evaluate(vm))
+
+    def differentiate(self, respectTo: str, vm: VariableMap = None):
+        return Multiplication(
+            Exponent(
+                Secant(self.value),
+                2
+            ),
+            self.value.differentiate(respectTo, vm)
+        )
+
+    def simplify(self):
+        # TODO: return fractions for common angles.
+        #       E.g. cos(pi/4) -> sqrt(2)/2
+        return self
+
+class Secant(Function):
+    def evaluate(self, vm: VariableMap = None):
+        return 1 / sin(self.value.evaluate(vm))
+
+    def differentiate(self, respectTo: str, vm: VariableMap = None):
+        return Multiplication(
+            Multiplication(
+                Secant(self.value),
+                Tangent(self.value)
+            ),
+            self.value.differentiate(respectTo, vm)
+        )
+
+    def simplify(self):
+        # TODO: return fractions for common angles.
+        #       E.g. sec(pi/4) -> sqrt(2)
+        return self
+
+class Cosecant(Function):
+    def evaluate(self, vm: VariableMap = None):
+        return 1 / cos(self.value.evaluate(vm))
+
+    def differentiate(self, respectTo: str, vm: VariableMap = None):
+        return Multiplication(
+            Multiplication(
+                Cosecant(self.value),
+                Cotangent(self.value)
+            ),
+            Multiplication(
+                self.value.differentiate(respectTo, vm),
+                Number(-1)
+            )
+        )
+
+    def simplify(self):
+        # TODO: return fractions for common angles.
+        #       E.g. csc(pi/4) -> sqrt(2)
+        return self
+
+class Cotangent(Function):
+    def evaluate(self, vm: VariableMap = None):
+        return 1 / tan(self.value.evaluate(vm))
+
+    def differentiate(self, respectTo: str, vm: VariableMap = None):
+        return Multiplication(
+            -1,
+            Exponent(
+                Cosecant(self.value),
+                2
+            )
+        )
+
+    def simplify(self):
+        # TODO: return fractions for common angles.
+        #       E.g. cot(pi/4) -> 1
+        return self
+
 # Define exports
 __all__ = [
     'ABS',
     'AbsoluteValue',
+    'Cosecant',
     'Cosine',
+    'Cotangent',
     'Function',
+    'Secant',
     'Sine',
+    'Tangent',
 ]

@@ -26,7 +26,11 @@ OperatorMap = {
 FunctionMap = {
     'abs': AbsoluteValue,
     'cos': Cosine,
+    'cot': Cotangent,
+    'csc': Cosecant,
+    'sec': Secant,
     'sin': Sine,
+    'tan': Tangent,
 }
 
 # List of operator characters in reverse order of operation precedence
