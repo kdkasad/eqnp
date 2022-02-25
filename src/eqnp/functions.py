@@ -17,9 +17,6 @@ class Function(UnaryExpression, ABC):
     pass
 
 class AbsoluteValue(Function):
-    def __repr__(self):
-        return f'|{self.value}|'
-
     def evaluate(self, vm: VariableMap = None):
         return abs(self.value.evaluate(vm))
 
