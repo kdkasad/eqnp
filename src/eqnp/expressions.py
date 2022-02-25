@@ -113,6 +113,27 @@ class Expression(ABC):
             again = simplified.simplify()
         return simplified
 
+class UnaryExpression(Expression, ABC):
+    """
+    Abstract class representing an expression with one child expression.
+    """
+    def __init__(self, value: Expression):
+        self.value = value
+
+    def __repr__(self):
+        return f'{type(self).__name__}({self.value})'
+
+class BinaryExpression(Expression, ABC):
+    """
+    Abstract class respresenting an expression with two child expressions.
+    """
+    def __init__(self, left: Expression, right: Expression):
+        self.left = left
+        self.right = right
+
+    def __repr__(self):
+        return f'{type(self).__name__}({self.left}, {self.right})'
+
 class Variable(Expression):
     """
     Represents a variable.
@@ -139,27 +160,6 @@ class Variable(Expression):
 
     def simplify(self):
         return self
-
-class UnaryExpression(Expression, ABC):
-    """
-    Abstract class representing an expression with one child expression.
-    """
-    def __init__(self, value: Expression):
-        self.value = value
-
-    def __repr__(self):
-        return f'{type(self).__name__}({self.value})'
-
-class BinaryExpression(Expression, ABC):
-    """
-    Abstract class respresenting an expression with two child expressions.
-    """
-    def __init__(self, left: Expression, right: Expression):
-        self.left = left
-        self.right = right
-
-    def __repr__(self):
-        return f'{type(self).__name__}({self.left}, {self.right})'
 
 class Number(Expression):
     """
