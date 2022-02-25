@@ -187,11 +187,14 @@ class Number(Expression):
     def __repr__(self):
         return str(self.value)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         # Allow comparison with a plain number type
         if isinstance(other, int) or isinstance(other, float):
             return self.value == other
         return super().__eq__(other)
+
+    def __hash__(self):
+        return hash(self.value)
 
     def differentiate(self, respectTo: str, vm: VariableMap) -> Expression:
         return Number(0)
