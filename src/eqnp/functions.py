@@ -64,8 +64,8 @@ class Cosine(Function):
         return cos(self.value.evaluate(vm))
 
     def differentiate(self, respectTo: str, vm: VariableMap = None):
-        return Subtraction(
-            Number(0),
+        return Multiplication(
+            Number(-1),
             Multiplication(
                 Sine(self.value),
                 self.value.differentiate(respectTo, vm)
