@@ -281,6 +281,10 @@ class Multiplication(BinaryExpression):
         if isinstance(self.left, Number) and isinstance(self.right, Number):
             return Number(self.evaluate(None))
 
+        # Simplify x*x to x^2
+        if self.left == self.right:
+            return Exponent(self.left, Number(2))
+
         # Simplify y*(x/y) to x
         if isinstance(self.left, Division) and self.left.right == self.right:
             return self.left.left
@@ -291,6 +295,12 @@ class Multiplication(BinaryExpression):
         if isinstance(self.left, Exponent) and isinstance(self.right, Exponent) \
                 and self.left.left == self.right.left:
             return Exponent(self.left.left, Addition(self.left.right, self.right.right))
+
+        # Simplify x*x^a to x^(a+1)
+        if isinstance(self.left, Exponent) and self.right == self.left.left:
+            return Exponent(self.left.left, Addition(self.left.right, Number(1)))
+        if isinstance(self.right, Exponent) and self.left == self.right.left:
+            return Exponent(self.right.left, Addition(self.right.right, Number(1)))
 
         return self
 
