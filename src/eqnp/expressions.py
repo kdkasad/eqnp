@@ -62,6 +62,10 @@ class Expression(ABC):
         return not self.__eq__(other)
 
     @abstractmethod
+    def __hash__(self):
+        pass
+
+    @abstractmethod
     def evaluate(self, vm: VariableMap = None):
         """
         Calculate the value of an expression.
@@ -117,6 +121,9 @@ class Variable(Expression):
     def __repr__(self) -> str:
         return self.name
 
+    def __hash__(self):
+        return hash(self.name)
+
     def differentiate(self, respectTo: str, vm: VariableMap) -> Expression:
         if self.name == respectTo:
             return Number(1)
@@ -138,6 +145,9 @@ class UnaryExpression(Expression, ABC):
     def __repr__(self):
         return f'{type(self).__name__}({self.value})'
 
+    def __hash__(self):
+        return hash(self.value)
+
 class BinaryExpression(Expression, ABC):
     """
     Abstract class respresenting an expression with two child expressions.
@@ -148,6 +158,9 @@ class BinaryExpression(Expression, ABC):
 
     def __repr__(self):
         return f'{type(self).__name__}({self.left}, {self.right})'
+
+    def __hash__(self):
+        return hash((self.left, self.right))
 
 class MultiOperandExpression(Expression, ABC):
     """
@@ -173,6 +186,9 @@ class MultiOperandExpression(Expression, ABC):
                 return False
             return set(self.operands) == set(other.operands)
         return super().__eq__(other)
+
+    def __hash__(self):
+        return hash(tuple(self.operands))
 
 class Number(Expression):
     """
@@ -202,7 +218,7 @@ class Number(Expression):
     def simplify(self):
         return self
 
-class Addition(BinaryExpression):
+class Addition(MultiOperandExpression):
     """
     Represents the addition operation.
 
@@ -210,35 +226,25 @@ class Addition(BinaryExpression):
     expressions' evaluations.
     """
     def evaluate(self, vm: VariableMap = None):
-        return self.left.evaluate(vm) + self.right.evaluate(vm)
+        return sum(self.operands)
 
     def differentiate(self, respectTo: str, vm: VariableMap) -> Expression:
-        return Addition(
-            self.left.differentiate(respectTo, vm),
-            self.right.differentiate(respectTo, vm)
-        )
+        return Addition(*[x.differentiate(respectTo, vm) for x in self.operands])
 
     def simplify(self):
-        self.left = self.left.simplify()
-        self.right = self.right.simplify()
+        self.operands = [x.simplify() for x in self.operands]
 
-        # If both operands are numbers, evaluate them
-        if isinstance(self.left, Number) and isinstance(self.right, Number):
+        # If all operands are numbers, evaluate the expression
+        if all(isinstance(x, Number) for x in self.operands):
             return Number(self.evaluate(None))
 
         # Simplify x/a + y/a to (x-y)/a
-        if isinstance(self.left, Division) and isinstance(self.right, Division) \
-                and self.left.right == self.right.right:
-            return Division(Addition(self.left.left, self.right.left), self.left.right)
+        if all(isinstance(x, Division) for x in self.operands):
+            denominators = [x.right for x in self.operands]
+            if all(x == denominators[0] for x in denominators):
+                return Division(Addition(x.left for x in self.operands), denominators[0])
 
         return self
-
-    def __eq__(self, other) -> bool:
-        # (a + b) == (b + a)
-        if isinstance(other, type(self)):
-            return (self.left == other.left and self.right == other.right) \
-                or (self.left == other.right and self.right == other.left)
-        return super().__eq__(other)
 
 class Subtraction(BinaryExpression):
     """
@@ -282,52 +288,41 @@ class Multiplication(BinaryExpression):
         return self.left.evaluate(vm) * self.right.evaluate(vm)
 
     def differentiate(self, respectTo: str, vm: VariableMap) -> Expression:
-        return Addition(
-            Multiplication(
-                self.left,
-                self.right.differentiate(respectTo, vm)
-            ),
-            Multiplication(
-                self.right,
-                self.left.differentiate(respectTo, vm)
-            )
-        )
+        raise NotImplementedError('Differentiation of multiplication expressions has not been implemented')
 
     def simplify(self):
-        self.left = self.left.simplify()
-        self.right = self.right.simplify()
+        self.operands = [x.simplify() for x in operands]
 
         # Identities
-        if self.left == 0 or self.right == 0:
-            return Number(0)
-        if self.left == 1:
-            return self.right
-        if self.right == 1:
-            return self.left
+        for operand in self.operands:
+            if operand == 0:
+                return Number(0)
+
+        # x * 1 = x
+        self.operands = [x for x in self.operands if x != 1]
 
         # If both operands are numbers, evaluate them
-        if isinstance(self.left, Number) and isinstance(self.right, Number):
+        if all(isinstance(x, Number) for x in self.operands):
             return Number(self.evaluate(None))
 
-        # Simplify y*(x/y) to x
-        if isinstance(self.left, Division) and self.left.right == self.right:
-            return self.left.left
-        if isinstance(self.right, Division) and self.right.right == self.left:
-            return self.right.left
+        # When there are only two factors
+        # TODO: implement this logic for 3+ factor expressions
+        if len(self.operands) == 2:
+            left = self.operands[0]
+            right = self.operands[1]
 
-        # Simplify x^a * x^b to x^(a+b)
-        if isinstance(self.left, Exponent) and isinstance(self.right, Exponent) \
-                and self.left.left == self.right.left:
-            return Exponent(self.left.left, Addition(self.left.right, self.right.right))
+            # Simplify y*(x/y) to x
+            if isinstance(left, Division) and left.right == right:
+                return left.left
+            if isinstance(right, Division) and right.right == left:
+                return right.left
+
+            # Simplify x^a * x^b to x^(a+b)
+            if isinstance(left, Exponent) and isinstance(right, Exponent) \
+                    and left.left == right.left:
+                return Exponent(left.left, Addition(left.right, right.right))
 
         return self
-
-    def __eq__(self, other) -> bool:
-        # (a * b) == (b * a)
-        if isinstance(other, type(self)):
-            return (self.left == other.left and self.right == other.right) \
-                or (self.left == other.right and self.right == other.left)
-        return super().__eq__(other)
 
 class Division(BinaryExpression):
     """
