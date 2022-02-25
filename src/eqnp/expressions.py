@@ -101,6 +101,18 @@ class Expression(ABC):
         """
         pass
 
+    def simplify_fully(self):
+        """
+        Simplify the expression fully. Works by continuing to simplify the
+        expression until simplifying further doesn't change the expression.
+        """
+        simplified = self.simplify()
+        again = simplified.simplify()
+        while simplified != again:
+            simplified = again
+            again = simplified.simplify()
+        return simplified
+
 class Variable(Expression):
     """
     Represents a variable.
