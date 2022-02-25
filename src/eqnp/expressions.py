@@ -334,6 +334,15 @@ class Division(BinaryExpression):
     child expression's evaluation divided by that of the second child
     expression.
     """
+
+    # TODO:
+    # Implement a function which checks if a certain
+    # expression is a factor of the denominator
+
+    # TODO:
+    # Implement a function which can move a factor of
+    # the denominator to the numerator and vice versa
+
     def evaluate(self, vm: VariableMap = None):
         return self.left.evaluate(vm) / self.right.evaluate(vm)
 
