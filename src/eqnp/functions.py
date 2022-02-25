@@ -10,6 +10,7 @@
 #
 
 from abc import ABC, abstractmethod
+from math import sin, cos, tan
 from .expressions import *
 
 class Function(UnaryExpression, ABC):
@@ -46,9 +47,44 @@ class AbsoluteValue(Function):
 # Alias for AbsoluteValue
 ABS = AbsoluteValue
 
+class Sine(Function):
+    def evaluate(self, vm: VariableMap = None):
+        return sin(self.value.evaluate(vm))
+
+    def differentiate(self, respectTo: str, vm: VariableMap = None):
+        return Multiplication(
+            Cosine(self.value),
+            self.value.differentiate(respectTo, vm)
+        )
+
+    def simplify(self):
+        # TODO: return fractions for common angles.
+        #       E.g. sin(pi/4) -> sqrt(2)/2
+        return self
+
+class Cosine(Function):
+    def evaluate(self, vm: VariableMap = None):
+        return cos(self.value.evaluate(vm))
+
+    def differentiate(self, respectTo: str, vm: VariableMap = None):
+        return Subtraction(
+            Number(0),
+            Multiplication(
+                Sine(self.value),
+                self.value.differentiate(respectTo, vm)
+            )
+        )
+
+    def simplify(self):
+        # TODO: return fractions for common angles.
+        #       E.g. cos(pi/4) -> sqrt(2)/2
+        return self
+
 # Define exports
 __all__ = [
     'ABS',
     'AbsoluteValue',
+    'Cosine',
     'Function',
+    'Sine',
 ]
