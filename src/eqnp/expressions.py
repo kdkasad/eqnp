@@ -78,7 +78,7 @@ class Expression(ABC):
         pass
 
     @abstractmethod
-    def differentiate(self, respectTo: str, vm: VariableMap):
+    def differentiate(self, respectTo: str, vm: VariableMap = None):
         """
         Calculate the derivative of the expression tree with respect to a given
         variable.
@@ -117,7 +117,7 @@ class Variable(Expression):
     def __repr__(self) -> str:
         return self.name
 
-    def differentiate(self, respectTo: str, vm: VariableMap) -> Expression:
+    def differentiate(self, respectTo: str, vm: VariableMap = None) -> Expression:
         if self.name == respectTo:
             return Number(1)
         elif vm == None:
@@ -168,7 +168,7 @@ class Number(Expression):
             return self.value == other
         return super().__eq__(other)
 
-    def differentiate(self, respectTo: str, vm: VariableMap) -> Expression:
+    def differentiate(self, respectTo: str, vm: VariableMap = None) -> Expression:
         return Number(0)
 
     def simplify(self):
@@ -184,7 +184,7 @@ class Addition(BinaryExpression):
     def evaluate(self, vm: VariableMap = None):
         return self.left.evaluate(vm) + self.right.evaluate(vm)
 
-    def differentiate(self, respectTo: str, vm: VariableMap) -> Expression:
+    def differentiate(self, respectTo: str, vm: VariableMap = None) -> Expression:
         return Addition(
             self.left.differentiate(respectTo, vm),
             self.right.differentiate(respectTo, vm)
@@ -222,7 +222,7 @@ class Subtraction(BinaryExpression):
     def evaluate(self, vm: VariableMap = None):
         return self.left.evaluate(vm) - self.right.evaluate(vm)
 
-    def differentiate(self, respectTo: str, vm: VariableMap) -> Expression:
+    def differentiate(self, respectTo: str, vm: VariableMap = None) -> Expression:
         return Subtraction(
             self.left.differentiate(respectTo, vm),
             self.right.differentiate(respectTo, vm)
@@ -253,7 +253,7 @@ class Multiplication(BinaryExpression):
     def evaluate(self, vm: VariableMap = None):
         return self.left.evaluate(vm) * self.right.evaluate(vm)
 
-    def differentiate(self, respectTo: str, vm: VariableMap) -> Expression:
+    def differentiate(self, respectTo: str, vm: VariableMap = None) -> Expression:
         return Addition(
             Multiplication(
                 self.left,
@@ -312,7 +312,7 @@ class Division(BinaryExpression):
     def evaluate(self, vm: VariableMap = None):
         return self.left.evaluate(vm) / self.right.evaluate(vm)
 
-    def differentiate(self, respectTo: str, vm: VariableMap) -> Expression:
+    def differentiate(self, respectTo: str, vm: VariableMap = None) -> Expression:
         return Division(
             Subtraction(
                 Multiplication(
@@ -367,7 +367,7 @@ class Exponent(BinaryExpression):
     def evaluate(self, vm: VariableMap = None):
         return self.left.evaluate(vm) ** self.right.evaluate(vm)
 
-    def differentiate(self, respectTo: str, vm: VariableMap) -> Expression:
+    def differentiate(self, respectTo: str, vm: VariableMap = None) -> Expression:
         return Multiplication(
             Multiplication(
                 self.right,
