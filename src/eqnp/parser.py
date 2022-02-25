@@ -11,12 +11,6 @@
 
 from .expressions import *
 
-__all__ = [
-    'parse_expression',
-    'OperatorMap',
-    'OperatorSets',
-]
-
 # Map from operator characters to their corresponding expression classes
 OperatorMap = {
     '+': Addition,
@@ -85,3 +79,10 @@ def parse_expression(text: str) -> Expression:
         return Variable(text)
 
     raise ValueError('Unknown expression string: ' + text)
+
+# Define exports
+__all__ = [
+    'OperatorMap',
+    'OperatorSets',
+    'parse_expression',
+]

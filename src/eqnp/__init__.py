@@ -9,5 +9,10 @@
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 #
 
+from .parser import __all__ as __parser_all
+from .expressions import __all__ as __expressions_all
+
 from .parser import *
 from .expressions import *
+
+__all__ = __parser_all + __expressions_all

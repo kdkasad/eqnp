@@ -421,3 +421,20 @@ def Root(base: Expression, num: Expression) -> Expression:
             base
         )
     )
+
+
+# Define exports
+__all__ = [
+    'Addition',
+    'BinaryExpression',
+    'Division',
+    'Exponent',
+    'Expression',
+    'Multiplication',
+    'Number',
+    'Root',
+    'Subtraction',
+    'UnaryExpression',
+    'Variable',
+    'VariableMap',
+]
