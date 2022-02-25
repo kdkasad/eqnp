@@ -134,6 +134,9 @@ class BinaryExpression(Expression, ABC):
     def __repr__(self):
         return f'{type(self).__name__}({self.left}, {self.right})'
 
+# We must import the functions module after defining the base classes
+from .functions import *
+
 class Variable(Expression):
     """
     Represents a variable.
@@ -376,6 +379,15 @@ class Division(BinaryExpression):
         if isinstance(self.left, Exponent) and isinstance(self.right, Exponent) \
                 and self.left.left == self.right.left:
             return Exponent(self.left.left, Subtraction(self.left.right, self.right.right))
+
+        # Simplify sin(x)/cos(x) to tan(x)
+        if isinstance(self.left, Sine) and isinstance(self.right, Cosine) \
+                and self.left.value == self.right.value:
+            return Tangent(self.left.value)
+        # Simplify cos(x)/sin(x) to cot(x)
+        if isinstance(self.left, Cosine) and isinstance(self.right, Sine) \
+                and self.left.value == self.right.value:
+            return Cotangent(self.left.value)
 
         return self
 
