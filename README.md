@@ -43,7 +43,7 @@ are supported (`...` means an expression):
 | `... * ...` | Multiplication -- Must have operands on either side             |
 | `... / ...` | Division -- Must have operands on either side                   |
 | `(...)`     | Grouping -- used to group operations to enforce a certain order |
-| `|...|`     | Absolute value -- same as `abs(...)`                            |
+| `\|...\|`     | Absolute value -- same as `abs(...)`                            |
 | `abs(...)`  | Absolute value                                                  |
 | `sin(...)`  | Sine function                                                   |
 | `cos(...)`  | Cosine function                                                 |
