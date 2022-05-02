@@ -31,6 +31,29 @@ from eqnp import *
 Then run `parse_expression(...)`, passing in a string which is an expression.
 [See below](#expression-string-syntax) for syntax.
 
+### Example
+
+```python
+In [1]: import eqnp
+
+In [2]: function = eqnp.parse_expression(' 1 / x^2 ')
+
+In [3]: print(function)
+Out[3]: Division(1, Exponent(x, 2))
+
+In [4]: derivative = function.differentiate(respectTo='x')
+
+In [5]: print(derivative)
+Out[5]: Division(Subtraction(Multiplication(0, Exponent(x, 2)), Multiplication(1, Multiplication(Multiplication(2, Exponent(x, Subtraction(2, 1))), 1))), Exponent(Exponent(x, 2), 2))
+
+In [6]: derivative = derivative.simplify_fully()
+
+In [7]: print(derivative)
+Out[7]: Division(Subtraction(0, Multiplication(2, x)), Exponent(x, 4))
+
+      # Out[7] is equivalent to '(-2 * x) / (x ^ 4)'
+```
+
 ### Expression string syntax
 
 Currently, the following operators, functions, and other syntactical structures
@@ -52,6 +75,8 @@ are supported (`...` means an expression):
 | `sec(...)`  | Secant function                                                 |
 | `cot(...)`  | Cotangent function                                              |
 | `-n`        | Negation -- `n` must be a constant number                       |
+
+> Note: The absolute value bars do not have to be escaped. They're only that way in the markdown file because the table syntax uses pipe characters.
 
 ## To do
 
