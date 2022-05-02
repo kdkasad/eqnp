@@ -1,11 +1,11 @@
 # eqnp
-A simple expression parser/calculator
+A simple symbolic derivative calculator and simplification engine.
 
 ## Goal
 
 The goal of eqnp is to be a program which can parse expressions (and maybe
 equations at some point) and can manipulate them in various ways. This might
-include:
+eventually include:
 
  * Simplifying
  * Differentiating (finding derivatives)
