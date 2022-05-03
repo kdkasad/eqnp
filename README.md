@@ -16,6 +16,29 @@ In addition, this is a project that I'm creating only from my own knowledge. My
 goal is to not use any resources relating to the actual function of eqnp.
 (Python documentation is acceptable, of course.)
 
+## Install
+
+eqnp is a Python package, so it can be installed in multiple ways.
+
+### Install directly from repository
+
+Run the following command to download and install eqnp.
+
+```sh
+$ python -m pip install git+https://github.com/kdkasad/eqnp
+```
+
+### Clone repository
+
+Another method is to clone the repository first, then install from the local
+copy.
+
+```sh
+$ git clone https://github.com/kdkasad/eqnp
+$ cd eqnp
+$ python -m pip install .
+```
+
 ## Usage
 
 Import the `parse_expression()` function from `eqnp.parser`:
