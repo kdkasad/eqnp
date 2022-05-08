@@ -1,0 +1,67 @@
+name: Deploy package
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  use-build:
+    name: Build packages
+    uses: ./.github/workflows/build.yml
+
+  create-release:
+    name: Create GitHub release
+    runs-on: ubuntu-latest
+    needs: use-build
+    environment: production
+    steps:
+      - name: Check out sources
+        uses: actions/checkout@v3
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: dist
+
+      - name: Print tag description
+        id: tag-desc
+        run: |
+          printf '%s' '::set-output name=tag-desc::'
+          git cat-file tag ${{ github.ref_name }} | sed ':a ; 1,5d; /^-----BEGIN PGP SIGNATURE-----$/,$d; s/%/%25/g; s/$/%0A/g' | tr -d '\n'
+
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ github.event.repository.name }} ${{ github.ref_name }}
+          body: ${{ steps.tag-desc.outputs.tag-desc }}
+          files: 'dist/*'
+          generate_release_notes: false
+
+  upload-to-pypi:
+    name: Upload package to PyPI
+    runs-on: ubuntu-latest
+    needs: use-build
+    environment: production
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: dist
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.x'
+
+      - name: Install twine
+        run: 'python -m pip install twine'
+
+      - name: Upload package to PyPI
+        run: 'python -m twine upload dist/*'
+        env:
+          TWINE_USERNAME: '__token__'
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+
