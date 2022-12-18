@@ -65,6 +65,10 @@ def parse_expression(text: str) -> Expression:
     # Same as depth but specific to absolute value bars
     abs_depth = 0
 
+    # Empty string -> None
+    if not text:
+        return None
+
     # If string is a number, return the number
     if isnumstr(text):
         try:
