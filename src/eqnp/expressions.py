@@ -138,17 +138,20 @@ class BinaryExpression(Expression, ABC):
 from .functions import *
 
 class Variable(Expression):
-    """
-    Represents a variable.
-    """
+    """Represents a variable."""
+
     def __init__(self, name: str):
         self.name = name
 
     def evaluate(self, vm: VariableMap):
         # TODO: catch errors
-        if vm == None:
-            raise ValueError(f'No value for variable {self.name}')
-        return vm.get(self.name).evaluate(vm)
+        try:
+            val = vm[self.name]
+            if val is None:
+                raise TypeError('None is not evaluable')
+            return val.evaluate(vm)
+        except (TypeError, KeyError) as err:
+            raise ValueError(f"No value for variable '{self.name}'") from err
 
     def __repr__(self) -> str:
         return self.name
