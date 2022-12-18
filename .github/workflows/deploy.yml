@@ -3,7 +3,7 @@ name: Deploy package
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   use-build:
@@ -28,15 +28,15 @@ jobs:
       - name: Print tag description
         id: tag-desc
         run: |
-          printf '%s' '::set-output name=tag-desc::'
-          git cat-file tag ${{ github.ref_name }} | sed ':a ; 1,5d; /^-----BEGIN PGP SIGNATURE-----$/,$d; s/%/%25/g; s/$/%0A/g' | tr -d '\n'
+          printf '%s' 'tag-desc=' >> $GITHUB_OUTPUT
+          git cat-file tag ${{ github.ref_name }} | sed ':a ; 1,5d; /^-----BEGIN PGP SIGNATURE-----$/,$d; s/%/%25/g; s/$/%0A/g' | tr -d '\n' >> $GITHUB_OUTPUT
 
       - name: Create release
         uses: softprops/action-gh-release@v1
         with:
           name: ${{ github.event.repository.name }} ${{ github.ref_name }}
           body: ${{ steps.tag-desc.outputs.tag-desc }}
-          files: 'dist/*'
+          files: "dist/*"
           generate_release_notes: false
 
   upload-to-pypi:
@@ -54,14 +54,13 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
-          python-version: '3.x'
+          python-version: "3.x"
 
       - name: Install twine
-        run: 'python -m pip install twine'
+        run: "python -m pip install twine"
 
       - name: Upload package to PyPI
-        run: 'python -m twine upload dist/*'
+        run: "python -m twine upload dist/*"
         env:
-          TWINE_USERNAME: '__token__'
+          TWINE_USERNAME: "__token__"
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-
